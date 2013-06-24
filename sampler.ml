@@ -70,7 +70,7 @@ let multi_sampler k f =
         avals.(idx) <- fval;
         let rec deep_set idx = 
             update_sum idx;
-            if idx == 0 then stats.(idx) <- true
+            if idx == 0 then (stats.(idx) <- true;Stack.push idx mdfy_stack)
             else if stats.(idx) == true then deep_set ((idx-1)/2)
             else 
                 begin
