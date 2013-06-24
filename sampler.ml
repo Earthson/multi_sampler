@@ -70,7 +70,8 @@ let multi_sampler k f =
         avals.(idx) <- fval;
         let rec deep_set idx = 
             update_sum idx;
-            if stats.(idx) == true then deep_set ((idx-1)/2)
+            if idx == 0 then stats.(idx) <- true
+            else if stats.(idx) == true then deep_set ((idx-1)/2)
             else 
                 begin
                 stats.(idx) <- true;
@@ -94,4 +95,4 @@ let multi_sampler k f =
 (*testing*)
 let test_f = fun i -> (float_of_int (i+1))*.0.3
 let test_gen, test_set, test_to_set, test_update_with_stack, test_recover = multi_sampler 10 test_f;;
-test_to_set 3 23.33;;
+test_set 3 23.33;;
