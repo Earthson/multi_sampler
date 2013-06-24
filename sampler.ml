@@ -26,11 +26,13 @@ let multi_sampler defaults k =
                 else for_iter (left+1) (new_r-.sums.(left))
         in for_iter 0 r_v
     in let rec to_stack idx =
-        if stats.(idx) = true then ()
+        if stats.(idx) == true then ()
         else
+            begin
             stats.(idx) <- true;
             to_stack ((idx-1)/2);
             Stack.push idx mdfy_stack
+            end
     in let get_sum idx = 
         if idx >= k then 0.0
         else sums.(idx)
@@ -41,16 +43,25 @@ let multi_sampler defaults k =
     in let update_with_stack () =
         Stack.iter update_sum mdfy_stack
     in let to_set idx fval =
+        begin
         avals.(idx) <- fval;
         to_stack idx
+        end
     in let set idx fval = 
         avals.(idx) <- fval;
         let rec deep_set idx = 
             update_sum idx;
-            if stats.(idx) = true then deep_set ((idx-1)/2)
+            if stats.(idx) == true then deep_set ((idx-1)/2)
             else 
+                begin
                 stats.(idx) <- true;
                 deep_set ((idx-1)/2);
                 Stack.push idx mdfy_stack
+                end
         in deep_set idx
     in sample_gen, set, to_set, update_with_stack;;
+
+(*testing*)
+let test_a = Array.init 10 (fun i -> (float_of_int (i+1))*.0.3);;
+let test_gen, test_set, test_to_set, test_update_with_stack = multi_sampler test_a 10;;
+test_to_set 3 23.33;;
