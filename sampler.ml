@@ -86,13 +86,16 @@ let multi_sampler k f =
                 let tmp = Stack.pop ss in
                 begin
                     avals.(tmp) <- f tmp;
+                    stats.(tmp) <- false;
                     update_sum tmp;
                     for_iter ss
                 end
         in for_iter mdfy_stack
-    in sample_gen, set, to_set, update_with_stack, clear;;
+    in let show_sums () = sums
+    in let show_stats () = stats
+    in let show_vals () = avals
+    in sample_gen, set, to_set, update_with_stack, clear, show_sums, show_stats, show_vals;;
 
 (*testing*)
 let test_f = fun i -> (float_of_int (i+1))*.0.3
-let test_gen, test_set, test_to_set, test_update_with_stack, test_recover = multi_sampler 10 test_f;;
-test_set 3 23.33;;
+let gen, set, to_set, update_with_stack, clear, show_sums, show_stats, show_vals = multi_sampler 10 test_f;;
