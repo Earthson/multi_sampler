@@ -9,8 +9,27 @@ let get_sums a k =
             for_iter (i-1)
     in for_iter (k-1);;
 
-let multi_sampler defaults k =
-    let avals = Array.copy defaults in
+(*
+@parameters
+f: int->float
+    f x: for defalut values of position x
+k: int
+    length of values array
+
+@return
+val sample_gen : unit -> int = <fun>
+    generate random variable
+val set : int -> float -> unit = <fun>
+    set index value: change the value without cache
+val to_set : int -> float -> unit = <fun>
+    to_set index val: add change to cache(stack)
+val update_with_stack : unit -> unit = <fun>
+    make the changes by "to_set" effective
+val clear : unit -> unit = <fun>
+    clear changes with stack
+*)
+let multi_sampler k f =
+    let avals = Array.init k f in
     let sums = get_sums avals k in
     let stats = Array.make (Array.length avals) false in
     let mdfy_stack = Stack.create() in
@@ -59,9 +78,20 @@ let multi_sampler defaults k =
                 Stack.push idx mdfy_stack
                 end
         in deep_set idx
-    in sample_gen, set, to_set, update_with_stack;;
+    in let clear () =
+        let rec for_iter ss =
+            if Stack.is_empty ss then ()
+            else
+                let tmp = Stack.pop ss in
+                begin
+                    avals.(tmp) <- f tmp;
+                    update_sum tmp;
+                    for_iter ss
+                end
+        in for_iter mdfy_stack
+    in sample_gen, set, to_set, update_with_stack, clear;;
 
 (*testing*)
-let test_a = Array.init 10 (fun i -> (float_of_int (i+1))*.0.3);;
-let test_gen, test_set, test_to_set, test_update_with_stack = multi_sampler test_a 10;;
+let test_f = fun i -> (float_of_int (i+1))*.0.3
+let test_gen, test_set, test_to_set, test_update_with_stack, test_recover = multi_sampler 10 test_f;;
 test_to_set 3 23.33;;
