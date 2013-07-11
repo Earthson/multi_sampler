@@ -1,3 +1,4 @@
+(*just for fun*)
 (*get sums of array a of length k*)
 let get_sums a k =
     let sums = Array.copy a in
